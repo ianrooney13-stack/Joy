@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Joy</title>
+<meta name="theme-color" content="#E0A040">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Joy">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiSm95Iiwic2hvcnRfbmFtZSI6IkpveSIsInN0YXJ0X3VybCI6Ii4vIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiI0ZBRjdGMSIsInRoZW1lX2NvbG9yIjoiI0UwQTA0MCJ9">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FAF7F1;
+    --paper:#FFFFFF;
+    --ink:#2B2A28;
+    --ink-soft:#726E66;
+    --ink-faint:#A7A199;
+    --gold:#E0A040;
+    --gold-soft:#F3DDB0;
+    --teal:#33645B;
+    --teal-soft:#D9E7E3;
+    --berry:#A13F5C;
+    --berry-soft:#F0DCE2;
+    --sky:#5C7C9E;
+    --sky-soft:#DDE6EE;
+    --line:#EAE3D3;
+    --shadow: 0 8px 24px -12px rgba(43,42,40,0.18);
+    --radius: 20px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: var(--cream);
+    color: var(--ink);
+    font-family:'Public Sans', sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  #app{
+    max-width:480px;
+    margin:0 auto;
+    min-height:100vh;
+    background: var(--cream);
+    position:relative;
+    padding-bottom:92px;
+  }
+  .display{ font-family:'Fraunces', serif; font-variation-settings:'opsz' 40; }
+  ::selection{ background: var(--gold-soft); }
+
+  /* ---------- Header ---------- */
+  header.top{
+    padding: 28px 22px 8px;
+  }
+  .wordmark{
+    display:flex; align-items:center; gap:8px;
+    font-size:13px; letter-spacing:0.14em; text-transform:uppercase;
+    color: var(--ink-faint); font-weight:600;
+  }
+  .wordmark .dot{ width:7px; height:7px; border-radius:50%; background: var(--gold); box-shadow:0 0 0 4px var(--gold-soft);}
+  .greeting{
+    font-size:30px; margin:10px 0 2px; font-weight:600; line-height:1.15;
+  }
+  .subgreeting{ color:var(--ink-soft); font-size:14.5px; }
+
+  /* ---------- Section shell ---------- */
+  section{ padding: 18px 22px; }
+  .section-title{
+    font-size:12.5px; text-transform:uppercase; letter-spacing:0.1em;
+    color:var(--ink-faint); font-weight:700; margin-bottom:12px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .section-title .add-link{
+    text-transform:none; letter-spacing:0; color:var(--teal); font-weight:600; cursor:pointer; font-size:13px;
+  }
+
+  /* ---------- Coming Up constellation ---------- */
+  .horizon-wrap{ position:relative; padding-top:6px; }
+  .horizon-scroll{
+    display:flex; gap:14px; overflow-x:auto; scroll-snap-type:x proximity;
+    padding: 6px 2px 14px; -ms-overflow-style:none; scrollbar-width:none;
+  }
+  .horizon-scroll::-webkit-scrollbar{ display:none; }
+  .horizon-line{
+    position:absolute; top:38px; left:22px; right:22px; height:2px;
+    background: repeating-linear-gradient(to right, var(--line) 0 6px, transparent 6px 12px);
+    z-index:0;
+  }
+  .node{
+    position:relative; z-index:1; scroll-snap-align:start;
+    flex: 0 0 auto; width:132px;
+    display:flex; flex-direction:column; align-items:center; text-align:center;
+    cursor:pointer;
+  }
+  .node .glow{
+    width:34px; height:34px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:15px; margin-bottom:10px;
+    background: var(--paper); border:2px solid var(--gold);
+    box-shadow: 0 0 0 5px var(--gold-soft);
+    transition: transform .15s ease;
+  }
+  .node:active .glow{ transform: scale(0.92); }
+  .node.far .glow{ border-color: var(--ink-faint); box-shadow: 0 0 0 5px rgba(167,161,153,0.18); opacity:.85;}
+  .node .when{ font-size:11.5px; font-weight:700; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.04em;}
+  .node .title{ font-size:14.5px; font-weight:600; margin-top:3px; line-height:1.25; }
+  .node .who{ font-size:12px; color:var(--ink-soft); margin-top:2px; }
+  .node.add-node .glow{ border-style:dashed; color:var(--ink-faint); }
+  .node.add-node .title{ color: var(--ink-faint); font-weight:500; }
+  .empty-horizon{
+    background:var(--paper); border-radius:var(--radius); padding:20px;
+    text-align:center; box-shadow:var(--shadow);
+  }
+  .empty-horizon p{ margin:0 0 12px; color:var(--ink-soft); font-size:14.5px; }
+
+  /* ---------- Nudge ---------- */
+  .nudge{
+    background: var(--teal-soft); color:#284a43; border-radius:16px;
+    padding:14px 16px; font-size:14.5px; line-height:1.4; display:flex; gap:10px; align-items:flex-start;
+  }
+  .nudge .spark{ font-size:16px; }
+
+  /* ---------- Today card ---------- */
+  .today-card{
+    background: linear-gradient(155deg, #2E4B44, #1F332E);
+    color:#F5EFE1; border-radius: var(--radius); padding:22px; box-shadow: var(--shadow);
+  }
+  .today-card h3{ margin:0 0 6px; font-size:19px; font-family:'Fraunces',serif; font-weight:600; }
+  .today-card p{ margin:0 0 16px; font-size:13.5px; color:#CFE0DA; }
+  .btn{
+    border:none; border-radius:999px; padding:12px 20px; font-weight:600; font-size:14.5px;
+    cursor:pointer; font-family:'Public Sans',sans-serif;
+  }
+  .btn-light{ background:#F5EFE1; color:#1F332E; }
+  .btn-outline{ background:transparent; border:1.5px solid rgba(245,239,225,0.5); color:#F5EFE1; margin-left:8px; }
+  .btn-gold{ background:var(--gold); color:#2B2200; }
+  .btn-berry{ background:var(--berry); color:#fff; }
+  .btn-teal{ background:var(--teal); color:#fff; }
+  .btn-ghost{ background:transparent; color:var(--teal); padding:8px 4px; }
+  .idea-suggestion{
+    margin-top:14px; background:rgba(255,255,255,0.08); border-radius:14px; padding:14px;
+  }
+  .idea-suggestion .cat{ font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--gold-soft); font-weight:700;}
+  .idea-suggestion .txt{ font-size:16px; margin-top:6px; font-family:'Fraunces',serif; }
+
+  /* ---------- Memories strip ---------- */
+  .mem-strip{ display:flex; gap:12px; overflow-x:auto; padding:2px 2px 4px; }
+  .mem-card{
+    flex:0 0 auto; width:150px; background:var(--paper); border-radius:16px; padding:14px;
+    box-shadow: var(--shadow);
+  }
+  .mem-card .mood{ font-size:20px; }
+  .mem-card .txt{ font-size:13.5px; margin-top:8px; line-height:1.35; }
+  .mem-card .date{ font-size:11px; color:var(--ink-faint); margin-top:10px; text-transform:uppercase; letter-spacing:.04em;}
+  .capture-btn{
+    display:flex; align-items:center; gap:10px; width:100%; background:var(--paper);
+    border-radius:16px; padding:14px 16px; box-shadow:var(--shadow); border:none; cursor:pointer;
+    font-family:'Public Sans',sans-serif; font-size:14.5px; font-weight:600; color:var(--ink); margin-top:12px;
+  }
+  .capture-btn .ic{ width:30px;height:30px;border-radius:50%; background:var(--berry-soft); color:var(--berry);
+    display:flex;align-items:center;justify-content:center; font-size:15px; flex:0 0 auto; }
+
+  /* ---------- Check-in banner ---------- */
+  .checkin-banner{
+    background: var(--sky-soft); border-radius:16px; padding:14px 16px; display:flex; align-items:center;
+    justify-content:space-between; gap:10px;
+  }
+  .checkin-banner .txt{ font-size:14px; color:#2E4459; }
+  .checkin-banner .txt b{ display:block; font-size:15px; margin-bottom:2px; }
+
+  /* ---------- Tabs ---------- */
+  nav.tabs{
+    position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+    width:100%; max-width:480px; background:var(--paper); border-top:1px solid var(--line);
+    display:flex; padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+  }
+  nav.tabs button{
+    flex:1; background:none; border:none; display:flex; flex-direction:column; align-items:center; gap:4px;
+    color:var(--ink-faint); font-family:'Public Sans',sans-serif; font-size:11.5px; font-weight:600; cursor:pointer;
+    padding:6px 0;
+  }
+  nav.tabs button .ic{ font-size:19px; }
+  nav.tabs button.active{ color:var(--teal); }
+
+  .view{ display:none; }
+  .view.active{ display:block; }
+
+  /* ---------- Ideas view ---------- */
+  .chip-row{ display:flex; gap:8px; overflow-x:auto; padding:4px 2px 14px; }
+  .chip{
+    flex:0 0 auto; padding:8px 14px; border-radius:999px; background:var(--paper); border:1px solid var(--line);
+    font-size:13px; font-weight:600; color:var(--ink-soft); cursor:pointer; white-space:nowrap;
+  }
+  .chip.active{ background:var(--teal); color:#fff; border-color:var(--teal); }
+  .idea-row{
+    background:var(--paper); border-radius:14px; padding:14px 16px; margin-bottom:10px; display:flex;
+    align-items:center; justify-content:space-between; gap:10px; box-shadow:var(--shadow);
+  }
+  .idea-row .txt{ font-size:14.5px; }
+  .idea-row .cat-tag{ font-size:11px; color:var(--ink-faint); margin-top:3px; text-transform:uppercase; letter-spacing:.03em;}
+  .idea-row .do-it{ background:var(--gold-soft); color:#7A5411; border:none; border-radius:999px; padding:8px 12px;
+    font-size:12.5px; font-weight:700; cursor:pointer; flex:0 0 auto; }
+
+  /* ---------- Timeline view ---------- */
+  .tl-item{ display:flex; gap:14px; margin-bottom:20px; }
+  .tl-dot{ width:38px; flex:0 0 auto; display:flex; flex-direction:column; align-items:center; }
+  .tl-dot .circle{ width:36px;height:36px;border-radius:50%; background:var(--berry-soft); display:flex;
+    align-items:center; justify-content:center; font-size:17px; }
+  .tl-dot .stem{ flex:1; width:2px; background:var(--line); margin-top:6px; }
+  .tl-body{ padding-bottom:4px; }
+  .tl-body .date{ font-size:11.5px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.04em; font-weight:700;}
+  .tl-body .txt{ font-size:15px; margin-top:4px; line-height:1.4; font-family:'Fraunces',serif; }
+
+  /* ---------- Modal ---------- */
+  .overlay{
+    position:fixed; inset:0; background:rgba(43,42,40,0.42); display:none; align-items:flex-end; justify-content:center;
+    z-index:50;
+  }
+  .overlay.active{ display:flex; }
+  .sheet{
+    background:var(--cream); width:100%; max-width:480px; border-radius:24px 24px 0 0; padding:22px;
+    max-height:88vh; overflow-y:auto; animation: rise .22s ease;
+  }
+  @keyframes rise{ from{ transform:translateY(24px); opacity:0;} to{ transform:translateY(0); opacity:1;} }
+  .sheet h2{ font-family:'Fraunces',serif; font-size:21px; margin:0 0 4px; }
+  .sheet .sub{ color:var(--ink-soft); font-size:13.5px; margin-bottom:18px; }
+  .field{ margin-bottom:14px; }
+  .field label{ font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; }
+  .field input[type=text], .field input[type=date], .field textarea{
+    width:100%; margin-top:6px; padding:12px 14px; border-radius:12px; border:1px solid var(--line);
+    background:var(--paper); font-family:'Public Sans',sans-serif; font-size:15px; color:var(--ink);
+  }
+  .field textarea{ resize:vertical; min-height:60px; }
+  .cat-grid{ display:flex; flex-wrap:wrap; gap:8px; margin-top:6px; }
+  .cat-pick{ padding:8px 13px; border-radius:999px; border:1px solid var(--line); background:var(--paper);
+    font-size:13px; cursor:pointer; color:var(--ink-soft); font-weight:600;}
+  .cat-pick.sel{ background:var(--teal); border-color:var(--teal); color:#fff; }
+  .mood-grid{ display:flex; gap:10px; margin-top:6px; }
+  .mood-pick{ font-size:22px; padding:8px 10px; border-radius:12px; border:1px solid var(--line); background:var(--paper); cursor:pointer; }
+  .mood-pick.sel{ background:var(--gold-soft); border-color:var(--gold); }
+  .sheet-actions{ display:flex; gap:10px; margin-top:6px; }
+  .sheet-actions .btn{ flex:1; text-align:center; }
+  .close-x{ position:absolute; top:18px; right:18px; background:none; border:none; font-size:20px; color:var(--ink-faint); cursor:pointer; }
+  .sheet{ position:relative; }
+
+  .checkin-q{ margin-bottom:16px; }
+  .checkin-q label{ display:block; font-family:'Fraunces',serif; font-size:15.5px; margin-bottom:8px; color:var(--ink); font-weight:500;}
+
+  .toast{
+    position:fixed; bottom:100px; left:50%; transform:translateX(-50%); background:var(--ink); color:var(--cream);
+    padding:10px 18px; border-radius:999px; font-size:13.5px; font-weight:600; z-index:80; opacity:0; pointer-events:none;
+    transition: opacity .25s ease, transform .25s ease;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(-6px); }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ============ HOME VIEW ============ -->
+  <div class="view active" id="view-home">
+    <header class="top">
+      <div class="wordmark"><span class="dot"></span> Joy</div>
+      <div class="greeting" id="greetingText">Hi.</div>
+      <div class="subgreeting" id="dateText"></div>
+    </header>
+
+    <section>
+      <div class="section-title">Coming up <span class="add-link" onclick="openEventSheet()">+ Add</span></div>
+      <div class="horizon-wrap" id="horizonWrap"></div>
+    </section>
+
+    <section id="nudgeSection" style="padding-top:0;"></section>
+
+    <section style="padding-top:0;">
+      <div class="today-card">
+        <h3>What would make today good?</h3>
+        <p>Draw an idea from your Joy Menu.</p>
+        <button class="btn btn-light" onclick="suggestIdea()">Show me something</button>
+        <button class="btn btn-outline" onclick="switchView('ideas')">Browse ideas</button>
+        <div id="ideaSuggestionBox"></div>
+      </div>
+    </section>
+
+    <section id="checkinSection" style="padding-top:0;"></section>
+
+    <section style="padding-top:0;">
+      <div class="section-title">Recent moments <span class="add-link" onclick="switchView('timeline')">See all</span></div>
+      <div class="mem-strip" id="memStrip"></div>
+      <button class="capture-btn" onclick="openMemorySheet()">
+        <span class="ic">✎</span> Capture a moment
+      </button>
+    </section>
+  </div>
+
+  <!-- ============ IDEAS VIEW ============ -->
+  <div class="view" id="view-ideas">
+    <header class="top">
+      <div class="wordmark"><span class="dot"></span> Joy Menu</div>
+      <div class="greeting">Ideas worth doing</div>
+      <div class="subgreeting">Things you'd genuinely enjoy. Tap "do it" to plan one.</div>
+    </header>
+    <section>
+      <div class="chip-row" id="ideaChips"></div>
+      <div id="ideaList"></div>
+      <button class="capture-btn" onclick="openIdeaSheet()">
+        <span class="ic" style="background:var(--sky-soft); color:var(--sky);">+</span> Add an idea
+      </button>
+    </section>
+  </div>
+
+  <!-- ============ TIMELINE VIEW ============ -->
+  <div class="view" id="view-timeline">
+    <header class="top">
+      <div class="wordmark"><span class="dot"></span> Joy Timeline</div>
+      <div class="greeting">The good parts</div>
+      <div class="subgreeting">Moments you noticed and kept.</div>
+    </header>
+    <section id="timelineList"></section>
+    <section style="padding-top:0;">
+      <button class="capture-btn" onclick="openMemorySheet()"><span class="ic">✎</span> Capture a moment</button>
+    </section>
+  </div>
+
+  <!-- ============ TAB BAR ============ -->
+  <nav class="tabs">
+    <button class="active" data-tab="home" onclick="switchView('home')"><span class="ic">✺</span>Home</button>
+    <button data-tab="ideas" onclick="switchView('ideas')"><span class="ic">☰</span>Ideas</button>
+    <button data-tab="timeline" onclick="switchView('timeline')"><span class="ic">◐</span>Memories</button>
+  </nav>
+
+  <!-- ============ MODALS ============ -->
+  <div class="overlay" id="overlay-event">
+    <div class="sheet">
+      <button class="close-x" onclick="closeSheets()">✕</button>
+      <h2>Something to look forward to</h2>
+      <div class="sub">A few words is plenty.</div>
+      <div class="field"><label>What is it</label><input type="text" id="ev-title" placeholder="e.g. Dinner with Helen"></div>
+      <div class="field"><label>When</label><input type="date" id="ev-date"></div>
+      <div class="field"><label>With</label><input type="text" id="ev-who" placeholder="e.g. Helen, Jack, friends"></div>
+      <div class="field">
+        <label>Category</label>
+        <div class="cat-grid" id="ev-cat-grid"></div>
+      </div>
+      <div class="sheet-actions">
+        <button class="btn btn-teal" onclick="saveEvent()">Add to horizon</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlay-memory">
+    <div class="sheet">
+      <button class="close-x" onclick="closeSheets()">✕</button>
+      <h2>Capture a moment</h2>
+      <div class="sub">Seconds, not paragraphs.</div>
+      <div class="field">
+        <label>How did it feel</label>
+        <div class="mood-grid" id="mood-grid"></div>
+      </div>
+      <div class="field"><label>What happened (optional)</label><textarea id="mem-text" placeholder="Jack absolutely losing his mind laughing on the trampoline."></textarea></div>
+      <div class="sheet-actions">
+        <button class="btn btn-berry" onclick="saveMemory()">Keep it</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlay-idea">
+    <div class="sheet">
+      <button class="close-x" onclick="closeSheets()">✕</button>
+      <h2>Add to your Joy Menu</h2>
+      <div class="sub">Something you'd genuinely like to do.</div>
+      <div class="field"><label>Idea</label><input type="text" id="idea-text" placeholder="e.g. Sunset walk on the beach"></div>
+      <div class="field">
+        <label>Category</label>
+        <div class="cat-grid" id="idea-cat-grid"></div>
+      </div>
+      <div class="sheet-actions">
+        <button class="btn btn-teal" onclick="saveIdea()">Add idea</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlay-checkin">
+    <div class="sheet">
+      <button class="close-x" onclick="closeSheets()">✕</button>
+      <h2>Weekly Joy check-in</h2>
+      <div class="sub">Two or three minutes, honestly.</div>
+      <div id="checkinForm"></div>
+      <div class="sheet-actions">
+        <button class="btn btn-sky" style="background:var(--sky); color:#fff;" onclick="saveCheckin()">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <div id="firebase-warning" style="display:none; position:fixed; top:0; left:0; right:0; background:#A13F5C; color:white; text-align:center; padding:10px 16px; font-family:'Public Sans',sans-serif; font-size:12.5px; z-index:100;"></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
+<script>
+/* ---------------- Firebase ---------------- */
+// Same project as Move — Joy keeps its own top-level node ("joy/...") so the
+// two apps' data never collide inside the one Realtime Database.
+const firebaseConfig = {
+  apiKey: "AIzaSyBRnoJsSuUf4JkD9WlxEJRoQU1lLoUJpr8",
+  authDomain: "move-app-c2306.firebaseapp.com",
+  databaseURL: "https://move-app-c2306-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "move-app-c2306",
+  storageBucket: "move-app-c2306.firebasestorage.app",
+  messagingSenderId: "842331384261",
+  appId: "1:842331384261:web:0b1a8c8e3d815616bb83ac"
+};
+
+let db = null;
+let firebaseReady = false;
+try{
+  firebase.initializeApp(firebaseConfig);
+  db = firebase.database();
+  firebaseReady = true;
+}catch(e){
+  console.error('Firebase init failed', e);
+  showFirebaseWarning();
+}
+
+function showFirebaseWarning(){
+  const el = document.getElementById('firebase-warning');
+  if(el){
+    el.textContent = "Couldn't reach the database — working offline for now. Changes may not be saved.";
+    el.style.display = 'block';
+  }
+}
+
+/* ---------------- Storage helpers ---------------- */
+// Falls back to a local in-memory copy of `fallback` if Firebase is
+// unreachable, so the app still works (just without persistence) offline.
+async function loadKey(key, fallback){
+  if(!firebaseReady) return fallback;
+  try{
+    const snap = await db.ref('joy/' + key).get();
+    return snap.exists() ? snap.val() : fallback;
+  }catch(e){
+    console.error('load failed', key, e);
+    showFirebaseWarning();
+    return fallback;
+  }
+}
+async function saveKey(key, value){
+  if(!firebaseReady) return;
+  try{
+    await db.ref('joy/' + key).set(value);
+  }catch(e){
+    console.error('save failed', key, e);
+    showFirebaseWarning();
+  }
+}
+
+const CATEGORIES = ["With Helen","With Jack","Friends","Family","Solo","Outdoors","Sport","Culture","Travel","Quick","Bigger adventures"];
+const MOODS = ["😄","🥰","😌","🤩","😂","🥲"];
+
+const SEED_EVENTS = [];
+const SEED_IDEAS = [
+  {text:"Walk to the beach with Jack", cat:"With Jack"},
+  {text:"Pint with an old friend", cat:"Friends"},
+  {text:"Spontaneous swim", cat:"Outdoors"},
+  {text:"Family movie night", cat:"Family"},
+  {text:"Play squash", cat:"Sport"},
+  {text:"Cook something new together", cat:"With Helen"},
+  {text:"Watch the sunset somewhere new", cat:"Solo"},
+  {text:"Book something you've talked about for months", cat:"Bigger adventures"},
+];
+const SEED_MEMORIES = [];
+
+let state = { events:[], ideas:[], memories:[], checkins:[], meta:{} };
+let activeIdeaCategory = "All";
+let evCatSel = null, ideaCatSel = null, moodSel = null;
+
+/* ---------------- Init ---------------- */
+async function init(){
+  state.events = await loadKey('joy:events', SEED_EVENTS);
+  state.ideas = await loadKey('joy:ideas', SEED_IDEAS.map((i,idx)=>({id:'seed'+idx, ...i})));
+  state.memories = await loadKey('joy:memories', SEED_MEMORIES);
+  state.checkins = await loadKey('joy:checkins', []);
+  state.meta = await loadKey('joy:meta', {});
+
+  renderGreeting();
+  renderHorizon();
+  renderNudge();
+  renderMemStrip();
+  renderCheckinBanner();
+  renderIdeaChips();
+  renderIdeaList();
+  renderTimeline();
+  buildCatGrids();
+  buildMoodGrid();
+}
+
+/* ---------------- Greeting ---------------- */
+function renderGreeting(){
+  const h = new Date().getHours();
+  const g = h < 12 ? "Good morning." : h < 18 ? "Good afternoon." : "Good evening.";
+  document.getElementById('greetingText').textContent = g;
+  document.getElementById('dateText').textContent = new Date().toLocaleDateString(undefined, {weekday:'long', month:'long', day:'numeric'});
+}
+
+/* ---------------- Coming up horizon ---------------- */
+function daysUntil(dateStr){
+  const today = new Date(); today.setHours(0,0,0,0);
+  const d = new Date(dateStr+'T00:00:00');
+  return Math.round((d - today)/86400000);
+}
+function whenLabel(diff){
+  if(diff < 0) return "Past";
+  if(diff === 0) return "Today";
+  if(diff === 1) return "Tomorrow";
+  if(diff < 7) return d3day(diff);
+  if(diff < 21) return Math.round(diff/7)+" wk";
+  return Math.round(diff/30)+" mo";
+}
+function d3day(diff){
+  const d = new Date(); d.setDate(d.getDate()+diff);
+  return d.toLocaleDateString(undefined,{weekday:'short'});
+}
+function catEmoji(cat){
+  const map = {"With Helen":"💛","With Jack":"⚽","Friends":"🍻","Family":"🏡","Solo":"🌿","Outdoors":"🌳","Sport":"🏃","Culture":"🎭","Travel":"✈️","Quick":"⚡","Bigger adventures":"🗺️"};
+  return map[cat] || "✨";
+}
+function renderHorizon(){
+  const wrap = document.getElementById('horizonWrap');
+  const upcoming = state.events
+    .map(e=>({...e, diff: daysUntil(e.date)}))
+    .filter(e=>e.diff >= 0)
+    .sort((a,b)=>a.diff-b.diff);
+
+  if(upcoming.length === 0){
+    wrap.innerHTML = `<div class="empty-horizon"><p>Nothing on the horizon yet. A future worth looking forward to starts with one plan.</p>
+      <button class="btn btn-teal" onclick="openEventSheet()">Add something</button></div>`;
+    return;
+  }
+
+  let html = `<div class="horizon-line"></div><div class="horizon-scroll">`;
+  upcoming.forEach(e=>{
+    const far = e.diff > 10;
+    html += `<div class="node ${far?'far':''}">
+      <div class="glow">${catEmoji(e.category)}</div>
+      <div class="when">${whenLabel(e.diff)}</div>
+      <div class="title">${escapeHtml(e.title)}</div>
+      ${e.who? `<div class="who">${escapeHtml(e.who)}</div>` : ''}
+    </div>`;
+  });
+  html += `<div class="node add-node" onclick="openEventSheet()">
+      <div class="glow">+</div>
+      <div class="when">&nbsp;</div>
+      <div class="title">Add something</div>
+    </div></div>`;
+  wrap.innerHTML = html;
+}
+
+/* ---------------- Nudge ---------------- */
+const SOCIAL_CATS = ["With Helen","With Jack","Friends","Family"];
+function renderNudge(){
+  const section = document.getElementById('nudgeSection');
+  const upcoming = state.events.map(e=>({...e, diff: daysUntil(e.date)})).filter(e=>e.diff>=0 && e.diff<=10);
+  const social = upcoming.filter(e=>SOCIAL_CATS.includes(e.category));
+  let msg = null;
+  if(social.length === 0){
+    msg = "Nothing social planned in the next 10 days. Worth fixing that?";
+  } else if(upcoming.length >= 5){
+    msg = "You've got a busy stretch coming up. Want to protect an evening for something fun too?";
+  }
+  if(msg){
+    section.innerHTML = `<div class="nudge"><span class="spark">✦</span><span>${msg}</span></div>`;
+  } else {
+    section.innerHTML = '';
+  }
+}
+
+/* ---------------- Idea suggestion ---------------- */
+function suggestIdea(){
+  if(state.ideas.length === 0){
+    document.getElementById('ideaSuggestionBox').innerHTML = `<div class="idea-suggestion"><div class="txt">Add a few ideas to your Joy Menu first.</div></div>`;
+    return;
+  }
+  const pick = state.ideas[Math.floor(Math.random()*state.ideas.length)];
+  document.getElementById('ideaSuggestionBox').innerHTML =
+    `<div class="idea-suggestion"><div class="cat">${escapeHtml(pick.cat)}</div><div class="txt">${escapeHtml(pick.text)}</div></div>`;
+}
+
+/* ---------------- Memories ---------------- */
+function renderMemStrip(){
+  const strip = document.getElementById('memStrip');
+  const recent = [...state.memories].sort((a,b)=> b.ts - a.ts).slice(0,5);
+  if(recent.length === 0){
+    strip.innerHTML = `<div class="mem-card"><div class="mood">✨</div><div class="txt">No moments captured yet. The next good one is worth keeping.</div></div>`;
+    return;
+  }
+  strip.innerHTML = recent.map(m=>`
+    <div class="mem-card">
+      <div class="mood">${m.mood||'✨'}</div>
+      <div class="txt">${escapeHtml(m.text||'(no note)')}</div>
+      <div class="date">${new Date(m.ts).toLocaleDateString(undefined,{month:'short',day:'numeric'})}</div>
+    </div>`).join('');
+}
+function renderTimeline(){
+  const list = document.getElementById('timelineList');
+  const sorted = [...state.memories].sort((a,b)=> b.ts - a.ts);
+  if(sorted.length === 0){
+    list.innerHTML = `<p style="color:var(--ink-soft); font-size:14.5px;">Nothing kept yet. Capture the next good moment — it takes seconds.</p>`;
+    return;
+  }
+  list.innerHTML = sorted.map(m=>`
+    <div class="tl-item">
+      <div class="tl-dot"><div class="circle">${m.mood||'✨'}</div><div class="stem"></div></div>
+      <div class="tl-body">
+        <div class="date">${new Date(m.ts).toLocaleDateString(undefined,{weekday:'short', month:'short', day:'numeric'})}</div>
+        <div class="txt">${escapeHtml(m.text||'A good moment, unnamed.')}</div>
+      </div>
+    </div>`).join('');
+}
+
+/* ---------------- Weekly check-in ---------------- */
+const CHECKIN_QUESTIONS = [
+  {key:"energy", q:"What gave you energy this week?"},
+  {key:"connect", q:"Who did you genuinely connect with?"},
+  {key:"best", q:"What was the best moment?"},
+  {key:"lookforward", q:"What are you looking forward to?"},
+  {key:"crowding", q:"Is work crowding out life right now?"},
+  {key:"tenpercent", q:"What would make next week 10% more enjoyable?"},
+];
+function isCheckinDue(){
+  const last = state.meta.lastCheckinDate;
+  if(!last) return true;
+  const days = (Date.now() - new Date(last).getTime())/86400000;
+  return days >= 7;
+}
+function renderCheckinBanner(){
+  const section = document.getElementById('checkinSection');
+  if(!isCheckinDue()){ section.innerHTML=''; return; }
+  section.innerHTML = `<div class="checkin-banner">
+    <div class="txt"><b>Weekly check-in</b>Two minutes, on how the week actually felt.</div>
+    <button class="btn btn-gold" style="flex:0 0 auto;" onclick="openCheckinSheet()">Start</button>
+  </div>`;
+}
+function openCheckinSheet(){
+  const form = document.getElementById('checkinForm');
+  form.innerHTML = CHECKIN_QUESTIONS.map(q=>`
+    <div class="checkin-q">
+      <label>${q.q}</label>
+      <input type="text" id="ci-${q.key}" placeholder="A line is plenty">
+    </div>`).join('');
+  showOverlay('overlay-checkin');
+}
+async function saveCheckin(){
+  const answers = {};
+  CHECKIN_QUESTIONS.forEach(q=> answers[q.key] = document.getElementById('ci-'+q.key).value.trim());
+  state.checkins.push({ts:Date.now(), answers});
+  state.meta.lastCheckinDate = new Date().toISOString();
+  await saveKey('joy:checkins', state.checkins);
+  await saveKey('joy:meta', state.meta);
+  closeSheets();
+  renderCheckinBanner();
+  showToast("Check-in saved. Nicely done.");
+}
+
+/* ---------------- Ideas view ---------------- */
+function renderIdeaChips(){
+  const row = document.getElementById('ideaChips');
+  const cats = ["All", ...CATEGORIES];
+  row.innerHTML = cats.map(c=>`<div class="chip ${c===activeIdeaCategory?'active':''}" onclick="pickIdeaCategory('${c.replace(/'/g,"\\'")}')">${c}</div>`).join('');
+}
+function pickIdeaCategory(c){ activeIdeaCategory = c; renderIdeaChips(); renderIdeaList(); }
+function renderIdeaList(){
+  const list = document.getElementById('ideaList');
+  const items = activeIdeaCategory === "All" ? state.ideas : state.ideas.filter(i=>i.cat === activeIdeaCategory);
+  if(items.length===0){ list.innerHTML = `<p style="color:var(--ink-soft); font-size:14.5px;">Nothing here yet.</p>`; return; }
+  list.innerHTML = items.map(i=>`
+    <div class="idea-row">
+      <div><div class="txt">${escapeHtml(i.text)}</div><div class="cat-tag">${escapeHtml(i.cat)}</div></div>
+      <button class="do-it" onclick="planIdea('${i.id}')">Plan it</button>
+    </div>`).join('');
+}
+function planIdea(id){
+  const idea = state.ideas.find(i=>i.id===id);
+  openEventSheet();
+  if(idea){
+    document.getElementById('ev-title').value = idea.text;
+    selectEvCat(idea.cat);
+  }
+}
+
+/* ---------------- Category / mood grids ---------------- */
+function buildCatGrids(){
+  ['ev-cat-grid','idea-cat-grid'].forEach(gridId=>{
+    const grid = document.getElementById(gridId);
+    grid.innerHTML = CATEGORIES.map(c=>`<div class="cat-pick" data-cat="${c}" onclick="selectCat('${gridId}','${c.replace(/'/g,"\\'")}')">${c}</div>`).join('');
+  });
+}
+function selectCat(gridId, cat){
+  if(gridId==='ev-cat-grid') evCatSel = cat; else ideaCatSel = cat;
+  document.querySelectorAll('#'+gridId+' .cat-pick').forEach(el=>{
+    el.classList.toggle('sel', el.dataset.cat === cat);
+  });
+}
+function selectEvCat(cat){ selectCat('ev-cat-grid', cat); }
+function buildMoodGrid(){
+  const grid = document.getElementById('mood-grid');
+  grid.innerHTML = MOODS.map(m=>`<div class="mood-pick" data-m="${m}" onclick="selectMood('${m}')">${m}</div>`).join('');
+}
+function selectMood(m){
+  moodSel = m;
+  document.querySelectorAll('#mood-grid .mood-pick').forEach(el=> el.classList.toggle('sel', el.dataset.m===m));
+}
+
+/* ---------------- Sheets ---------------- */
+function showOverlay(id){ document.getElementById(id).classList.add('active'); }
+function closeSheets(){ document.querySelectorAll('.overlay').forEach(o=>o.classList.remove('active')); }
+function openEventSheet(){
+  document.getElementById('ev-title').value='';
+  document.getElementById('ev-date').value = new Date().toISOString().slice(0,10);
+  document.getElementById('ev-who').value='';
+  evCatSel = null;
+  document.querySelectorAll('#ev-cat-grid .cat-pick').forEach(el=>el.classList.remove('sel'));
+  showOverlay('overlay-event');
+}
+function openMemorySheet(){
+  document.getElementById('mem-text').value='';
+  moodSel = null;
+  document.querySelectorAll('#mood-grid .mood-pick').forEach(el=>el.classList.remove('sel'));
+  showOverlay('overlay-memory');
+}
+function openIdeaSheet(){
+  document.getElementById('idea-text').value='';
+  ideaCatSel = null;
+  document.querySelectorAll('#idea-cat-grid .cat-pick').forEach(el=>el.classList.remove('sel'));
+  showOverlay('overlay-idea');
+}
+
+/* ---------------- Save actions ---------------- */
+async function saveEvent(){
+  const title = document.getElementById('ev-title').value.trim();
+  const date = document.getElementById('ev-date').value;
+  const who = document.getElementById('ev-who').value.trim();
+  if(!title || !date){ showToast("Add a title and a date"); return; }
+  state.events.push({id:'ev'+Date.now(), title, date, who, category: evCatSel || "Quick"});
+  await saveKey('joy:events', state.events);
+  closeSheets(); renderHorizon(); renderNudge();
+  showToast("Added to your horizon");
+}
+async function saveMemory(){
+  const text = document.getElementById('mem-text').value.trim();
+  state.memories.push({ts:Date.now(), text, mood: moodSel || "✨"});
+  await saveKey('joy:memories', state.memories);
+  closeSheets(); renderMemStrip(); renderTimeline();
+  showToast("Moment kept");
+}
+async function saveIdea(){
+  const text = document.getElementById('idea-text').value.trim();
+  if(!text){ showToast("Write the idea first"); return; }
+  state.ideas.push({id:'idea'+Date.now(), text, cat: ideaCatSel || "Solo"});
+  await saveKey('joy:ideas', state.ideas);
+  closeSheets(); renderIdeaList();
+  showToast("Added to your Joy Menu");
+}
+
+/* ---------------- Views ---------------- */
+function switchView(name){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  document.querySelectorAll('nav.tabs button').forEach(b=> b.classList.toggle('active', b.dataset.tab===name));
+}
+
+/* ---------------- Toast ---------------- */
+let toastTimer;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> t.classList.remove('show'), 2200);
+}
+
+function escapeHtml(str){
+  return (str||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+init();
+</script>
+</body>
+</html>
